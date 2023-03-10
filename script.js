@@ -22,7 +22,11 @@ const songsListUlTag = songsListContainer.querySelector("ul");
 const songsListCloseButton = document.getElementById("song_list_close_btn");
 const songsListModeButton = document.getElementById("songs_list_mode_btn");
 const songsListModeName = document.getElementById("songs_list_mode_name");
-const modes = ["repeat", "repeat_one", "shuffle"];
+
+const repeat = "repeat";
+const repeat_one = "repeat_one";
+const shuffle = "shuffle";
+const modes = [repeat, repeat_one, shuffle];
 
 var music_index = 0;
 var mode_index = 0;
@@ -31,12 +35,8 @@ var pasused = true;
 const setMusicContainerCenter = () => {
   if (musicContainer.clientHeight > document.body.clientHeight) {
     document.body.style.height = "fit-content";
-    // document.body.classList.remove("h-screen");
-    // document.body.classList.add("h-fit");
   } else {
     document.body.style.height = "100vh";
-    // document.body.classList.remove("h-fit");
-    // document.body.classList.add("h-screen");
   }
 }
 
@@ -47,7 +47,7 @@ const loadSongsList = () => {
       list_num = '0' + list_num;
     }
     let liTag = `
-    <li index="${index}" list-number="${list_num}" onclick="playMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden">
+    <li index="${index}" number="${list_num}" onclick="playMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden">
       <div class="animation${index} flex items-center text-sm w-4">
         <div>${list_num}</div>
       </div>
@@ -70,14 +70,16 @@ const loadSongsList = () => {
 const loadPlayingSongInList = () => {
   songsListUlTag.querySelectorAll('li').forEach(element => {
     let index = element.getAttribute("index");
-    let number = element.getAttribute("list-number");
+    let number = element.getAttribute("number");
 
     let animationEl = element.getElementsByClassName(`animation${index}`).item(0);
     if (music_index == index) {
+      element.classList.add("bg-gray-800");
       let playing_animation = `<div class="playing_animation"><span></span><span></span><span></span></div>`;
       animationEl.innerHTML = playing_animation;
     }
     else {
+      element.classList.remove("bg-gray-800");
       animationEl.innerHTML = `<div>${number}</div>`;
     }
   });
@@ -121,10 +123,12 @@ const loadMusic = () => {
   cover.setAttribute("src", song.cover);
 
   musicContainer.style.backgroundImage = `url(${song.cover})`;
+  loadPlayingSongInList();
 }
 
 const liveMusic = () => {
   (pasused) ? pauseAudio() : playAudio();
+  renderPlayIcon();
 }
 
 const playMusic = (index) => {
@@ -132,9 +136,7 @@ const playMusic = (index) => {
   loadMusic();
   setPause(false);
   liveMusic();
-  renderPlayIcon();
   hideSongsList();
-  loadPlayingSongInList();
 }
 
 const previousMusic = () => {
@@ -143,7 +145,6 @@ const previousMusic = () => {
   loadMusic();
   setPause(false);
   liveMusic();
-  renderPlayIcon();
 }
 
 const nextMusic = () => {
@@ -152,11 +153,28 @@ const nextMusic = () => {
   loadMusic();
   setPause(false);
   liveMusic();
-  renderPlayIcon();
 }
 
 const setPause = (what_ever) => {
   pasused = what_ever;
+}
+
+const displayModeLabel = () => {
+  let label = "";
+  switch (modes[mode_index]) {
+    case repeat:
+      label = "Repeat All";
+      break;
+
+    case repeat_one:
+      label = "Repeat One";
+      break;
+
+    case shuffle:
+      label = "Shuffle";
+      break;
+  }
+  songsListModeName.textContent = label;
 }
 
 const changeMode = () => {
@@ -164,22 +182,7 @@ const changeMode = () => {
   if (mode_index > modes.length - 1) {
     mode_index = 0;
   }
-
-  let label = "";
-  switch (modes[mode_index]) {
-    case "repeat":
-      label = "Repeat All";
-      break;
-
-    case "repeat_one":
-      label = "Repeat One";
-      break;
-
-    case "shuffle":
-      label = "Shuffle";
-      break;
-  }
-  songsListModeName.textContent = label;
+  displayModeLabel();
   renderModeIcon();
 }
 
@@ -248,16 +251,16 @@ audio.addEventListener('loadeddata', (event) => {
 
 audio.addEventListener('ended', () => {
   switch (modes[mode_index]) {
-    case "repeat":
+    case repeat:
       nextMusic();
       break;
 
-    case "repeat_one":
+    case repeat_one:
       audio.currentTime = 0;
       playAudio();
       break;
 
-    case "shuffle":
+    case shuffle:
       while (true) {
         let random_index = Math.floor(Math.random() * songs.length);
         if (random_index !== music_index) {
@@ -275,6 +278,7 @@ window.addEventListener('load', () => {
   setMusicContainerCenter();
   renderPlayIcon();
   renderModeIcon();
-  loadMusic();
   loadSongsList();
+  displayModeLabel();
+  loadMusic();
 });

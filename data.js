@@ -1,4 +1,4 @@
-const coverDir = "./assets/cover";
+const coverDir = "./assets/covers";
 const audioDir = "./assets/songs";
 
 const songs = [
