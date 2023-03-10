@@ -141,7 +141,7 @@ const playThisMusic = (index) => {
 
 const previousMusic = () => {
   music_index -= 1;
-  (music_index < 0) ? music_index = songs.length - 1 : mode_index = music_index ;
+  (music_index < 0) ? music_index = songs.length - 1 : music_index = music_index ;
   loadMusic();
   setPause(false);
   liveMusic();
@@ -149,7 +149,7 @@ const previousMusic = () => {
 
 const nextMusic = () => {
   music_index += 1;
-  (music_index > songs.length - 1) ? music_index = 0 : mode_index = music_index;
+  (music_index > songs.length - 1) ? music_index = 0 : music_index = music_index;
   loadMusic();
   setPause(false);
   liveMusic();
