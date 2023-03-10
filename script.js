@@ -47,17 +47,17 @@ const loadSongsList = () => {
       list_num = '0' + list_num;
     }
     let liTag = `
-    <li index="${index}" number="${list_num}" onclick="playMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden">
+    <li index="${index}" number="${list_num}" onclick="playThisMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden">
       <div class="animation${index} flex items-center text-sm w-4">
         <div>${list_num}</div>
       </div>
       <div class="flex gap-5 max-sm:gap-3 items-center">
         <div class="w-max">
-          <img class="w-12 h-12 rounded-lg aspect-square object-cover shrink-0" src="${song.cover}" alt="${song.title}" />
+          <img class="w-12 h-12 rounded-lg aspect-square object-cover" src="${song.cover}" alt="${song.title}" />
         </div>
         <div>
           <h1 class="text-base font-light">${song.title}</h1>
-          <div class="flex gap-3 text-sm text-slate-500 whitespace-nowrap overflow-hidden">
+          <div class="flex gap-3 text-sm text-slate-500 overflow-hidden">
             <h1>${song.artist}</h1>
           </div>
         </div>
@@ -131,7 +131,7 @@ const liveMusic = () => {
   renderPlayIcon();
 }
 
-const playMusic = (index) => {
+const playThisMusic = (index) => {
   music_index = index;
   loadMusic();
   setPause(false);
@@ -198,7 +198,6 @@ playButton.addEventListener('click', () => {
   (pasused) ? pasused = false : pasused = true;
   liveMusic();
   renderPlayIcon();
-  loadPlayingSongInList();
 });
 
 previousButton.addEventListener('click', () => {
