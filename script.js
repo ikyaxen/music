@@ -23,6 +23,8 @@ const songsListCloseButton = document.getElementById("song_list_close_btn");
 const songsListModeButton = document.getElementById("songs_list_mode_btn");
 const songsListModeName = document.getElementById("songs_list_mode_name");
 
+const loading = document.getElementById("loading");
+
 const repeat = "repeat";
 const repeat_one = "repeat_one";
 const shuffle = "shuffle";
@@ -81,6 +83,25 @@ const loadPlayingSongInList = () => {
     else {
       element.classList.remove("bg-gray-800");
       animationEl.innerHTML = `<div>${number}</div>`;
+    }
+  });
+}
+
+const togglePlayingAnimation = () => {
+  songsListUlTag.querySelectorAll('li').forEach(element => {
+    let index = element.getAttribute("index");
+
+    let spanTags = element.getElementsByClassName(`animation${index}`).item(0).querySelectorAll("span");
+    if (music_index == index) {
+      if (pasused) {
+        spanTags.forEach(span => {
+          span.style.animationPlayState = 'paused';
+        });
+      } else {
+        spanTags.forEach(span => {
+          span.style.animationPlayState = 'running';
+        });
+      }
     }
   });
 }
@@ -145,6 +166,7 @@ const previousMusic = () => {
   loadMusic();
   setPause(false);
   liveMusic();
+  togglePlayingAnimation();
 }
 
 const nextMusic = () => {
@@ -153,6 +175,7 @@ const nextMusic = () => {
   loadMusic();
   setPause(false);
   liveMusic();
+  togglePlayingAnimation();
 }
 
 const setPause = (what_ever) => {
@@ -186,6 +209,16 @@ const changeMode = () => {
   renderModeIcon();
 }
 
+const run = () => {
+  setMusicContainerCenter();
+  renderPlayIcon();
+  renderModeIcon();
+  loadSongsList();
+  displayModeLabel();
+  loadMusic();
+  togglePlayingAnimation();
+}
+
 modeButton.addEventListener('click', () => {
   changeMode();
 });
@@ -198,6 +231,7 @@ playButton.addEventListener('click', () => {
   (pasused) ? pasused = false : pasused = true;
   liveMusic();
   renderPlayIcon();
+  togglePlayingAnimation();
 });
 
 previousButton.addEventListener('click', () => {
@@ -273,11 +307,8 @@ audio.addEventListener('ended', () => {
   }
 });
 
+run();
+
 window.addEventListener('load', () => {
-  setMusicContainerCenter();
-  renderPlayIcon();
-  renderModeIcon();
-  loadSongsList();
-  displayModeLabel();
-  loadMusic();
+  loading.style.display = 'none';
 });
