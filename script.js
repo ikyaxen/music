@@ -6,7 +6,6 @@ const previousButton = document.getElementById("previous_btn");
 const nextButton = document.getElementById("next_btn");
 const listButton = document.getElementById("songs_list_btn");
 
-const prgressArea = document.getElementById("prgress_area");
 const progressBar = document.getElementById("progress_bar");
 
 const currentTime = document.getElementById("current_time");
@@ -23,6 +22,8 @@ const songsListCloseButton = document.getElementById("song_list_close_btn");
 const songsListModeButton = document.getElementById("songs_list_mode_btn");
 const songsListModeName = document.getElementById("songs_list_mode_name");
 
+const lyricsTag = document.getElementById("lyrics").querySelector(".content");
+
 const loading = document.getElementById("loading");
 
 const repeat = "repeat";
@@ -33,12 +34,16 @@ const modes = [repeat, repeat_one, shuffle];
 var music_index = 0;
 var mode_index = 0;
 var pasused = true;
+var lyrics = [];
+var currentLyricLineIndex = null;
 
 const setMusicContainerCenter = () => {
   if (musicContainer.clientHeight > document.body.clientHeight) {
-    document.body.style.height = "fit-content";
+    document.body.classList.add = "h-fit";
+    document.body.classList.remove = "h-screen";
   } else {
-    document.body.style.height = "100vh";
+    document.body.classList.remove = "h-fit";
+    document.body.classList.add = "h-screen";
   }
 }
 
@@ -54,8 +59,7 @@ const loadSongsList = () => {
         <div>${list_num}</div>
       </div>
       <div class="flex gap-5 max-sm:gap-3 items-center">
-        <div class="w-max">
-          <img class="w-12 h-12 rounded-lg aspect-square object-cover" src="${song.cover}" alt="${song.title}" />
+        <div class="w-12 aspect-square rounded-lg bg-cover bg-center bg-no-repeat" style="background-image: url(${song.cover})">
         </div>
         <div>
           <h1 class="text-base font-light">${song.title}</h1>
@@ -136,12 +140,44 @@ const pauseAudio = () => {
 }
 
 const loadMusic = () => {
+  currentLyricLineIndex = null;
+  lyrics = [];
+  lyricsTag.innerHTML = "";
   let song = songs[music_index];
 
   audio.setAttribute("src", song.audioDir);
   title.textContent = song.title;
   artist.textContent = song.artist;
   cover.setAttribute("src", song.cover);
+
+  fetch(song.lyricDir)
+  .then(res => {
+    res.text()
+    .then(result => {
+      let lines = result.trim().split('\n');
+      lines.map((line, index) => {
+        if (line.indexOf("[") != undefined && line.indexOf("]") != undefined && line.indexOf(":") != undefined) {
+          let [m, s] = line.slice(line.indexOf("[") + 1, line.indexOf("]")).split(":");
+          let min = Number(m);
+          let sec = Number(s);
+  
+          if (min > 0) {
+            sec += min * 60;
+          }
+  
+          let lyric = line.slice(line.indexOf("]") + 1, line.length);
+  
+          let lyricTag = `<div class="text-slate-500 lyric_index_${index} py-3">${lyric}</div>`;
+  
+          lyricsTag.innerHTML += lyricTag;
+  
+          lyrics.push({time: sec, line: lyric});
+        }
+      });
+    })
+    .catch(err => console.error(err))
+  })
+  .catch(err => console.error(err));
 
   musicContainer.style.backgroundImage = `url(${song.cover})`;
   loadPlayingSongInList();
@@ -209,6 +245,32 @@ const changeMode = () => {
   renderModeIcon();
 }
 
+const seekTo = () => {
+  audio.currentTime = audio.duration * (progressBar.value / 100);
+  setPause(false);
+  liveMusic();
+  renderPlayIcon();
+}
+
+const alignLyric = () => {
+  var a = $(`.lyric_index_${currentLyricLineIndex}`).height();
+  var c = $('#lyrics').height();
+  var d = $(`.lyric_index_${currentLyricLineIndex}`).offset().top - $(`.lyric_index_${currentLyricLineIndex}`).parent().offset().top;
+  var e = d + a / 2 - c / 2;
+  $('#lyrics').animate(
+    { scrollTop: e + 'px' },
+    { easing: 'swing', duration: 250 }
+  );
+}
+
+var lyricHeight = $('.content').height();
+$(window).on('resize', function () {
+  if ($('.content').height() != lyricHeight) {
+    lyricHeight = $('.content').height();
+    alignLyric();
+  }
+});
+
 const run = () => {
   setMusicContainerCenter();
   renderPlayIcon();
@@ -250,19 +312,30 @@ songsListCloseButton.addEventListener('click', () => {
   hideSongsList();
 });
 
-prgressArea.addEventListener('click', (event) => {
-  audio.currentTime = (event.offsetX / prgressArea.clientWidth) * audio.duration;
-  setPause(false);
-  liveMusic();
-  renderPlayIcon();
-});
-
 audio.addEventListener('timeupdate', (event) => {
   let current_time = event.target.currentTime;
   let total_time = event.target.duration;
 
-  let progress_width = (current_time / total_time) * 100;
-  progressBar.style.width = progress_width + "%";
+  let past = null;
+
+  lyrics.map((value, index) => {
+    if (value.time < current_time) {
+      past = index
+    }
+  })
+
+  if (past != null && past != currentLyricLineIndex) {
+    currentLyricLineIndex = past;
+    lyricsTag.querySelectorAll("div").forEach(item => {
+      item.style.color = "rgb(100 116 139)";
+    });
+
+    let current_lyric = lyricsTag.querySelector(`.lyric_index_${past}`);
+    current_lyric.style.color = "rgb(248 250 252)";
+    alignLyric();
+  }
+
+  progressBar.value = (current_time / total_time) * 100;
 
   let current_min = Math.floor(current_time / 60);
   let current_sec = Math.floor(current_time % 60);
