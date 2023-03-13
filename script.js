@@ -54,7 +54,7 @@ const loadSongsList = () => {
       list_num = '0' + list_num;
     }
     let liTag = `
-    <li index="${index}" number="${list_num}" onclick="playThisMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden">
+    <li index="${index}" number="${list_num}" onclick="playThisMusic(${index})" class="flex items-center hover:bg-gray-800 p-5 max-sm:p-3 rounded-xl cursor-pointer gap-5 overflow-hidden z-0">
       <div class="animation${index} flex items-center text-sm w-4">
         <div>${list_num}</div>
       </div>
