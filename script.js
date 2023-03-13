@@ -22,7 +22,8 @@ const songsListCloseButton = document.getElementById("song_list_close_btn");
 const songsListModeButton = document.getElementById("songs_list_mode_btn");
 const songsListModeName = document.getElementById("songs_list_mode_name");
 
-const lyricsTag = document.getElementById("lyrics").querySelector(".content");
+const lyricsTag = document.getElementById("lyrics");
+const lyricsContent = lyricsTag.querySelector(".content");
 
 const loading = document.getElementById("loading");
 
@@ -142,7 +143,7 @@ const pauseAudio = () => {
 const loadMusic = () => {
   currentLyricLineIndex = null;
   lyrics = [];
-  lyricsTag.innerHTML = "";
+  lyricsContent.innerHTML = "";
   let song = songs[music_index];
 
   audio.setAttribute("src", song.audioDir);
@@ -169,7 +170,7 @@ const loadMusic = () => {
   
           let lyricTag = `<div class="text-slate-500 lyric_index_${index} py-3">${lyric}</div>`;
   
-          lyricsTag.innerHTML += lyricTag;
+          lyricsContent.innerHTML += lyricTag;
   
           lyrics.push({time: sec, line: lyric});
         }
@@ -326,11 +327,11 @@ audio.addEventListener('timeupdate', (event) => {
 
   if (past != null && past != currentLyricLineIndex) {
     currentLyricLineIndex = past;
-    lyricsTag.querySelectorAll("div").forEach(item => {
+    lyricsContent.querySelectorAll("div").forEach(item => {
       item.style.color = "rgb(100 116 139)";
     });
 
-    let current_lyric = lyricsTag.querySelector(`.lyric_index_${past}`);
+    let current_lyric = lyricsContent.querySelector(`.lyric_index_${past}`);
     current_lyric.style.color = "rgb(248 250 252)";
     alignLyric();
   }
@@ -377,6 +378,26 @@ audio.addEventListener('ended', () => {
         }
       }
       break;
+  }
+});
+
+const toggle_btn = document.getElementById("toggle_btn");
+
+toggle_btn.addEventListener('click', () => {
+  if (cover.classList.contains("hidden")) {
+    cover.classList.remove("hidden");
+    cover.classList.add("block");
+  } else {
+    cover.classList.add("hidden");
+    cover.classList.remove("block");
+  }
+
+  if (lyricsTag.classList.contains("hidden")) {
+    lyricsTag.classList.remove("hidden");
+    lyricsTag.classList.add("block");
+  } else {
+    lyricsTag.classList.add("hidden");
+    lyricsTag.classList.remove("block");
   }
 });
 
